@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Password</title>
+</head>
+<body>
+    <h1>Edit Password</h1>
+
+    <div>
+        <label for="user_name">Username:</label>
+        <input type="text" id="user_name">
+    </div>
+
+    <div>
+        <label for="new_password">New Password:</label>
+        <input type="password" id="new_password">
+    </div>
+
+    <button onclick="editPassword()">Update Password</button>
+
+    <script>
+        function editPassword() {
+            var user_name = document.getElementById('user_name').value;
+            var new_password = document.getElementById('new_password').value;
+
+            // Make a GET request to the Flask route with query parameters
+            var url = '/edit_password?user_name=' + encodeURIComponent(user_name) + '&new_password=' + encodeURIComponent(new_password);
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        if (response.status === 10000) {
+                            alert('Password updated successfully');
+                            // Additional logic if needed
+                        } else {
+                            alert('Failed to update password: ' + response.msg);
+                        }
+                    } else {
+                        alert('An error occurred');
+                    }
+                }
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

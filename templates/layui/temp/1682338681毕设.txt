@@ -1,0 +1,145 @@
+reader = easyocr.Reader(['ch_sim'])
+    results = reader.readtext(gray)
+    result = {
+        'text': [],
+        'left': [],
+        'top': [],
+        'width': [],
+        'height': []
+    }
+
+    for i in results:
+        result['text'].append(i[1])
+        result['left'].append(i[0][0][0])
+        result['top'].append(i[0][0][1])
+        result['width'].append(i[0][1][0] - i[0][0][0])
+        result['height'].append(i[0][2][1] - i[0][1][1])
+
+    #for result in results:
+        #text = result[1]
+        #bbox = result[0]
+        #confidence = result[2]
+
+        # 输出识别结果的文本内容、坐标位置和置信度
+        #print(text, bbox, confidence)
+    #print(result)
+    search_text = request.form['search_text']
+    # 解析输出，获取文本位置p
+    for i in range(len(result['text'])):
+        text = result['text'][i]
+        x, y, w, h = result['left'][i], result['top'][i], result['width'][i], result['height'][i]
+        if search_text in text:
+            # 在原始图像中标记出文本边界框
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            #roi = img[y:y + h, x:x + w]
+
+            # 对ROI区域进行高斯马赛克处理
+            #roi = cv2.GaussianBlur(roi, (25, 25), 0)
+
+            # 将处理后的ROI区域放回原图
+            #img[y:y + h, x:x + w] = roi
+
+            # 在文本块上方绘制文本
+            #cv2.putText(img, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    # 遍历所有提取的文本区域，并查找匹配的文本
+    # 遍历OCR结果，搜索包含指定文本的文本区域
+    #for detection in results:
+        #text, coord, score = detection
+        #if search_text in text:
+            #x, y, w, h = coord
+            # 在原始图像中标记出文本边界框
+            #cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            #roi = img[y:y + h, x:x + w]
+            # 对ROI区域进行高斯马赛克处理
+            #roi = cv2.GaussianBlur(roi, (25, 25), 0)
+            # 将处理后的ROI区域放回原图
+            #img[y:y + h, x:x + w] = roi
+
+    # 显示结果图像
+    #cv2.namedWindow('Result', cv2.WINDOW_AUTOSIZE)
+    #cv2.resizeWindow('Result', img.shape[1], img.shape[0])
+    cv2.imshow('Result', img)
+    #plt.imshow(img)
+    #plt.show()
+    cv2.imwrite('output.jpg', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    filename = 'output.jpg'
+    return send_file(filename, as_attachment=True)
+
+
+
+
+
+
+
+api_url = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
+    api_key = "NzKGZLVmGbbrMCMygAvkwBZI"
+    secret_key = "bmDpgDOoi4Fcp6TXuAKP75ocs9MOwi8i"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    params = {"access_token": "", "language_type": "CHN_ENG"}
+    # 加载图片
+    # 从POST请求中获取上传的文件
+    file = request.files['file']
+
+    # 将文件读取到内存中
+    file_data = np.frombuffer(file.read(), np.uint8)
+
+    # 使用OpenCV读取图像数据
+    img = cv2.imdecode(file_data, cv2.IMREAD_COLOR)
+
+
+    # 读取图像并调用百度API进行OCR识别
+    img_str = cv2.imencode('.jpg', img)[1].tostring()
+    params['image'] = str(base64.b64encode(img_str), encoding='utf-8')
+    res = requests.post(api_url, headers=headers, params=params)
+    result = json.loads(res.text)
+    search_text = request.form['search_text']
+    # 显示结果图像
+    for i in range(len(result['words_result'])):
+        text = result['words_result'][i]['words']
+        x, y, w, h = result['words_result'][i]['location']['left'], result['words_result'][i]['location']['top'], \
+            result['words_result'][i]['location']['width'], result['words_result'][i]['location']['height']
+        if search_text in text:
+            # 找到包含指定文本的文本框
+            # 将文本框中的文本按照指定文本进行切割，获取指定文本所在的子串的起始位置和终止位置
+            start = text.index(search_text)
+            end = start + len(search_text)
+            # 计算指定文本所在子串的左上角和右下角坐标
+            text_size_start = cv2.getTextSize(text[:start], cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+            text_size_end = cv2.getTextSize(text[:end], cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+            x1, y1 = x + text_size_start[0][0], y
+            x2, y2 = x + text_size_end[0][0], y + h
+            # 在原始图像中标记出文本边界框
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+    # 显示标记后的图像
+    cv2.imshow("result", img)
+
+    # 在文本块上方绘制文本
+            #cv2.putText(img, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    # 遍历所有提取的文本区域，并查找匹配的文本
+    # 遍历OCR结果，搜索包含指定文本的文本区域
+    #for detection in results:
+        #text, coord, score = detection
+        #if search_text in text:
+            #x, y, w, h = coord
+            # 在原始图像中标记出文本边界框
+            #cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            #roi = img[y:y + h, x:x + w]
+            # 对ROI区域进行高斯马赛克处理
+            #roi = cv2.GaussianBlur(roi, (25, 25), 0)
+            # 将处理后的ROI区域放回原图
+            #img[y:y + h, x:x + w] = roi
+
+    # 显示结果图像
+    #cv2.namedWindow('Result', cv2.WINDOW_AUTOSIZE)
+    #cv2.resizeWindow('Result', img.shape[1], img.shape[0])
+    #cv2.imshow('Result', img)
+    #plt.imshow(img)
+    #plt.show()
+    cv2.imwrite('output.jpg', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    filename = 'output.jpg'
+    return send_file(filename, as_attachment=True)

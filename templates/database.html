@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all" />
+      <style>
+    body{margin: 10px;}
+  </style>
+</head>
+
+<body class="childrenBody">
+<style>
+  /* Example styles, modify them according to your preferences */
+  .form-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+  }
+
+  .form-container label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  .form-container input[type="file"],
+  .form-container input[type="text"],
+  .form-container input[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  .form-container input[type="submit"] {
+    background-color: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .form-container input[type="submit"]:hover {
+    background-color: #45a049;
+  }
+</style>
+
+<div class="form-container">
+  <form class="layui-form changePwd" action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="id" id="id" value="{{ id }}">
+    <input type="hidden" name="file_name" id="file_name" value="{{ file_name }}">
+    <input type="hidden" name="file_path" id="file_path" value="{{ file_path }}">
+
+    <label for="file">选择文件：</label>
+    <input type="file" id="file" name="file" accept=".xlsx, .xls" required>
+
+    <label for="text1">脱敏字段1：</label>
+    <input type="text" id="text1" name="text1" required>
+
+    <label for="text2">脱敏字段2：</label>
+    <input type="text" id="text2" name="text2" required>
+
+    <label for="text3">脱敏字段3：</label>
+    <input type="text" id="text3" name="text3" required>
+
+    <div>
+      <input type="hidden" id="btn" name="btn" value="">
+      <input type="submit" value="可推导加密" onclick="document.getElementById('btn').value = '1'">
+      <input type="submit" value="哈希加密" onclick="document.getElementById('btn').value = '2'">
+    </div>
+  </form>
+</div>
+
+<script type="text/javascript" src="/layui/layui.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script>
+
+    function layerclose() {
+        layui.use(['layer' ], function() {
+            var layer = layui.layer;
+            var index=parent.layer.getFrameIndex(window.name);//获取当前弹出层的层级
+            parent.layer.close(index);//关闭弹出层
+ $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[1].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[2].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[3].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[4].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[5].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[6].contentWindow.location.reload(true);//刷新父页面
+        })
+    }
+
+
+    layui.use(['upload','form','layer' ], function() {
+            upload = layui.upload
+            var uploadInst = upload.render({
+            elem: '#test1'
+            ,accept: 'file'
+            ,url: '/file/upload?type='+{{file_type}} //此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
+            ,before: function(obj){
+
+              //预读本地文件示例，不支持ie8
+              obj.preview(function(index, file, result){
+
+                layer.msg('上传成功');
+      });
+
+            }
+            ,done: function(res){
+
+                switch (res.status) {
+                        case 10001:
+                            layer.msg(res.msg);
+                            break;
+                        case 10000:
+                         $('#demoText').html(res.file_name);
+                         $('#file_name').val(res.file_name);
+                         $('#file_path').val(res.file_path);
+                            break;
+                    }
+            }});
+
+    });
+</script>
+
+</body>
+</html>
+<script>
+    $(function(){
+        var id = $("#id").val();
+
+
+        if(id != ""){
+
+            $.ajax({
+                url: "/file/get",
+                data:{"id":id},
+                dataType:"json",
+                success: function(data){
+                    $('#demoText').html(data.data.file_name);
+                    $('#file_name').val(data.data.file_name);
+                     $('#file_path').val(data.data.file_path);
+                    layui.form.render()
+
+                },error:function(){
+                }
+            });
+        }
+    })
+
+    function layerclose() {
+        layui.use(['layer' ], function() {
+            var layer = layui.layer;
+            var index=parent.layer.getFrameIndex(window.name);//获取当前弹出层的层级
+            parent.layer.close(index);//关闭弹出层
+ $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[1].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[2].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[3].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[4].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[5].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[6].contentWindow.location.reload(true);//刷新父页面
+        })
+    }
+    layui.use(['upload','form','layer' ], function() {
+
+        var form = layui.form;
+        var layer = layui.layer;
+
+
+        form.on('submit(*)', function(data) {
+            var index = layer.msg('提交中，请稍候',{icon: 16,time:false,shade:0.8});
+            var d = data.field;
+            var url = "/file/add";
+            if(d.id != ""){
+                url = "/file/edit";
+            }
+            $.ajax({
+                url: url,
+                data:d,
+                dataType:"json",
+                success: function(response){
+                    if(response.status == 10000){
+                        var index=parent.layer.getFrameIndex(window.name);//获取当前弹出层的层级
+                        parent.layer.close(index);//关闭弹出层
+                         $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[1].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[2].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[3].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[4].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[5].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[6].contentWindow.location.reload(true);//刷新父页面
+
+                    }else{
+                        layer.msg(response.msg);
+                    }
+                },error:function(){
+                    layer.close(index);
+                    layer.msg("保存失败！");
+                }
+            });
+            return false;
+        });
+    });
+</script>

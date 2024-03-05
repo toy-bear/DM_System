@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>login</title>
+    <link rel="stylesheet" href="/layui/css/login.css">
+    <link rel="stylesheet" href="/layui/css/login_btn.css">
+    <style type="text/css">
+    iframe#_hjRemoteVarsFrame {display: none !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important;}
+    body {
+        background-image: url('/layui/bj.jpg');
+        background-position: center;
+		background-repeat: no-repeat;
+		background-attachment: fixed;
+		background-size:100%
+      }
+</style>
+</head>
+<body>
+    <form>
+        <div class="_33T1-ZBLz7FQrNT-ZCfKte">
+        <div class="_1sxlTjCjFLM5k-nXvLkywP">
+
+            <section class="_3P7ejYsij9dpnS4OZiCJVK">
+                {% if messages %}
+                    <script>
+                      {% for msg in messages %}
+                        alert('{{ msg.message }}');
+                      {% endfor %}
+                    </script>
+                  {% endif %}
+                <div class="_2CKN4I1T1m1ACp1JPZ2CR9" style="background-color: white; padding: 20px;"><h1>教学数据脱敏系统</h1>
+                    <form class="ui error form">
+                        <div class="field"><label>用户名</label><br><br>
+                            <div class="ui input"><input name="username"  id="username" autocomplete="username"
+                                                         value="" style="width:331px">
+                            </div>
+                            <br>
+                        </div>
+                        <br>
+                        <div class="field"><label>密码</label><br><br>
+                            <div class="ui input"><input name="password" id="password"  autocomplete="current-password"
+                                                         type="password"
+                                                         value="" style="width:331px"></div>
+                        </div>
+                        <br>
+                        <div class="ui hidden divider"></div>
+                        <button type="submit" class="ui large circular fluid primary button" lay-submit lay-filter="loginForm">登录</button>
+                        <p align="center" style="padding-top: 15px;">创作人：朱国伟 </p>
+                    </form>
+                 
+            </section>
+        </div>
+    </div>
+
+    </form>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="/layui/layui.js"></script>
+    <script>
+        layui.use(['layer', 'form'], function () {
+            var layer = layui.layer;
+            var form = layui.form;
+
+            form.on('submit(loginForm)', function (data) {
+                     var username= $('#username').val();
+                     var password= $('#password').val();
+
+                    $.ajax({
+                        url: "user/login",
+                        type: "post",
+                        data:JSON.stringify({user_name: username, pass_word: password}),
+                        contentType: "application/json;charset=UTF-8",
+                        dataType: "json",
+                        success: function (response) {
+                            switch (response.status) {
+                                    case 10001:
+                                        layer.alert(response.msg);
+                                        break;
+                                    case 10000:
+                                        window.location.href="/home";
+                                        break;
+                                }
+                        },
+                        error: function (response) {
+                            console.log(response);
+                        }
+                      })
+
+                return false;
+            })
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <style>
+    body{margin: 10px;}
+
+    </style>
+</head>
+
+<body class="childrenBody">
+<form class="layui-form changePwd">
+    <input type="hidden" name="id" id="id" value="{{ id }}">
+    <input type="hidden" name="file_name" id="file_name" value="{{ file }}">
+    <div class="layui-upload">
+        <div class="layui-form-item">
+            <label class="layui-form-label">轮播图类型</label>
+            <div class="layui-input-block">
+                <input type="radio" name="banner_type" value="1" title="教师" checked="">
+                <input type="radio" name="banner_type" value="2" title="学生">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" checked="" name="status" lay-skin="switch" lay-filter="switchTest"
+                       lay-text="启用|禁用">
+            </div>
+        </div>
+        <label class="layui-form-label">轮播图</label>
+        <div class="layui-input-block">
+            <button type="button" class="layui-btn" id="test1">上传</button>
+            <div class="layui-upload-list">
+                <img class="layui-upload-img" id="demo1" style="weight:100px;height:100px">
+                <p id="demoText"></p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="*">保存</button>
+                <button type="button" class="layui-btn layui-btn-primary" onclick="layerclose();">关闭</button>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript" src="/layui/layui.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script>
+
+    function layerclose() {
+        layui.use(['layer' ], function() {
+            var layer = layui.layer;
+            var index=parent.layer.getFrameIndex(window.name);//获取当前弹出层的层级
+            parent.layer.close(index);//关闭弹出层
+            $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);//刷新父页面
+        })
+    }
+
+
+    layui.use(['upload','form','layer' ], function() {
+            upload = layui.upload
+            var uploadInst = upload.render({
+            elem: '#test1'
+            ,accept: 'file'
+            ,url: '/admin/upload' //此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
+            ,before: function(obj){
+              //预读本地文件示例，不支持ie8
+              obj.preview(function(index, file, result){
+        $('#demo1').attr('src', result); //图片链接（base64）
+      });
+
+            }
+            ,done: function(res){
+
+                switch (res.status) {
+                        case 10001:
+                            layer.msg(res.msg);
+                            break;
+                        case 10000:
+                            $("#file_name").val(res.file_name);
+                            break;
+                    }
+            }});
+
+    });
+
+</script>
+
+</body>
+</html>
+<script>
+    $(function(){
+        var id = $("#id").val();
+
+
+        if(id != ""){
+
+            $.ajax({
+                url: "/admin/banner_get",
+                data:{"id":id},
+                dataType:"json",
+                success: function(data){
+                    $('#demo1').attr('src', data.data.img_path);
+                    $('#file_name').val(data.data.file_name)
+                    if(data.data.banner_type == "1"){
+                    $('input[name="banner_type"][value=data.data.banner_type]').prop('checked','true');
+                    }
+                    else{
+                    $('input[name="banner_type"][value="2"]').prop('checked','true');
+                    }
+
+                    if(data.data.status == 100){
+                    $("input[name=status]").prop("checked","true");
+                    }else{
+                    $("input[name=status]").removeAttr("checked");
+                    }
+
+                    layui.form.render()
+
+                },error:function(){
+                }
+            });
+        }
+    })
+
+    function layerclose() {
+        layui.use(['layer' ], function() {
+            var layer = layui.layer;
+            var index=parent.layer.getFrameIndex(window.name);//获取当前弹出层的层级
+            parent.layer.close(index);//关闭弹出层
+ $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[1].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[2].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[3].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[4].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[5].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[6].contentWindow.location.reload(true);//刷新父页面
+        })
+    }
+    layui.use(['upload','form','layer' ], function() {
+
+        var form = layui.form;
+        var layer = layui.layer;
+
+
+        form.on('submit(*)', function(data) {
+            var index = layer.msg('提交中，请稍候',{icon: 16,time:false,shade:0.8});
+            var d = data.field;
+            var url = "/admin/banner_add";
+            if(d.id != ""){
+                url = "/admin/banner_edit";
+            }
+            $.ajax({
+                url: url,
+                data:d,
+                dataType:"json",
+                success: function(response){
+                    if(response.status == 10000){
+                        var index=parent.layer.getFrameIndex(window.name);//获取当前弹出层的层级
+                        parent.layer.close(index);//关闭弹出层
+                         $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[1].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[2].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[3].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[4].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[5].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[6].contentWindow.location.reload(true);//刷新父页面
+
+                    }else{
+                        layer.msg(response.msg);
+                    }
+                },error:function(){
+                    layer.close(index);
+                    layer.msg("保存失败！");
+                }
+            });
+            return false;
+        });
+    });
+
+
+</script>

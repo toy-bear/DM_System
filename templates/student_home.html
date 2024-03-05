@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>功能介绍</title>
+</head>
+<script>
+    p{
+        text-align:center;
+    }
+
+</script>
+<link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.staticfile.org/layui/2.7.6/layui.js"></script>
+<body>
+
+<div class="layui-carousel" id="test1" lay-filter="test1">
+    <div carousel-item="">
+        {{html|safe}}
+
+    </div>
+</div>
+<h1 style="text-align:center">学生不能上传文件到共享的文件区，只能根据是否拥有超级管理员和教师的权限去查看共享区的文件，如果有权限，则看到原本的文件，如果没有权限，就只能看到脱敏处理后的文件，学生也可以在专门的区域上传word，excel，图片文件进行单独的脱敏并下载以供后续的一系列操作。</h1>
+
+</body>
+</html>
+<script>
+
+         var b = 1920/460;//我的图片比例
+    //获取浏览器宽度
+    var W = $(window).width();
+    var H = $(window).height();
+    layui.use('carousel', function(){
+        var carousel = layui.carousel;
+        //建造实例
+        carousel.render({
+            elem: '#test1'
+            ,width: '100%' //设置容器宽度
+            ,height: (W/b).toString()+"px"  //按比例和浏览器可视页面宽度来获取高度
+            ,arrow: 'always' //始终显示箭头
+            //,anim: 'updown' //切换动画方式
+        });
+    });
+
+//窗口变化是重新加载
+$(window).resize(function () {
+    // setBanner();
+    window.location.reload()
+})
+
+</script>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>共享文件管理</title>
+  <link href="https://cdn.staticfile.org/layui/2.7.6/css/layui.css" rel="stylesheet">
+  <style>
+    body{padding: 6px 16px;}
+    .demo-carousel{height: 200px; line-height: 200px; text-align: center;}
+  </style>
+</head>
+<body>
+<table class="layui-hide" id="demo" lay-filter="test"></table>
+
+<script type="text/html" id="barDemo">
+    {%if user_type in [1,2]%}
+  <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">编辑</a>
+  <a class="layui-btn layui-btn-xs" lay-event="del">删除</a>
+  <a class="layui-btn layui-btn-xs" lay-event="down">下载</a>
+    {%endif%}
+    {%if user_type==3%}
+  <a class="layui-btn layui-btn-xs" lay-event="down">下载</a>
+    {%endif%}
+</script>
+
+
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.staticfile.org/layui/2.7.6/layui.js"></script>
+<script>
+layui.use(function(){
+
+  // 得到需要的内置组件
+  var layer = layui.layer; //弹层
+  var laypage = layui.laypage; //分页
+  var laydate = layui.laydate; //日期
+  var table = layui.table; //表格
+  var upload = layui.upload; //
+  var carousel = layui.carousel; //轮播
+  var element = layui.element; //元素操作
+  var slider = layui.slider; //滑块
+  var dropdown = layui.dropdown; //下拉菜单
+
+    var uploadInst = upload.render({
+            elem: '#test1'
+            ,url: '/file/upload' //此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
+            ,before: function(obj){
+              //预读本地文件示例，不支持ie8
+              obj.preview(function(index, file, result){
+                $('#demo1').attr('src', result); //图片链接（base64）
+              });
+
+            }
+            ,done: function(res){
+
+                switch (res.status) {
+                        case 10001:
+                            layer.msg(res.msg);
+                            break;
+                        case 10000:
+                            $('#file_path').val(res.data);
+                            break;
+                    }
+            }});
+
+
+  // 执行一个 table 实例
+  table.render({
+    elem: '#demo'
+    ,url: '/open_file/list' //数据接口（此处为静态数据，仅作演示）
+    ,title: '私密文件管理'
+    ,toolbar: '#toolbarDemo' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+    ,totalRow: true //开启合计行
+    ,cols: [[ //表头
+      {type: 'checkbox', fixed: 'left'}
+      ,{field: 'id', title: 'ID',  sort: true, fixed: 'left'}
+      ,{field: 'file_name', title: '文件名'}
+      ,{field: 'operator', title: '操作人', sort: true}
+      ,{field: 'create_time', title: '创建日期', sort: true}
+      ,{field: 'update_time', title: '更新日期', sort: true}
+      ,{fixed: 'right', title: '操作',width:300,   align:'center', toolbar: '#barDemo'}
+    ]],
+    page: true,
+    limit: 10 ,
+    limits: [1,5,10,30,50]
+  });
+
+
+              // 单元格工具事件
+              table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                var data = obj.data //获得当前行数据
+                ,layEvent = obj.event; //获得 lay-event 对应的值
+                if(layEvent === 'edit'){
+                    if(data.can==0){
+                        layer.msg('您没有权限操作')
+                    }else
+                    {
+                      index = parent.layer.open({
+                        type : 2,
+                        title : "共享文件管理",
+                        area: ['650px', '500px'],
+                        content : '/open_file/edit_page?id=' + data.id
+                    });
+                    layer.full(index);
+                    }
+                } else if(layEvent === 'down'){
+                    document.location.href = '/open_file/down?id='+data.id
+
+                 }else if(layEvent === 'del'){
+                 if(data.can==0){
+                        layer.msg('您没有权限操作')
+                    }else
+                    {
+                  layer.confirm('真的删除文件吗', function(index){
+                      $.ajax({
+                            url: "/open_file/delete",
+                            data:{"id":data.id},
+                            dataType:"json",
+                            success: function(response){
+                                if(response.status == 10000){
+
+                                    var index=parent.layer.getFrameIndex(window.name);//获取当前弹出层的层级
+                                    parent.layer.close(index);//关闭弹出层
+                                     $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[1].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[2].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[3].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[4].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[5].contentWindow.location.reload(true);//刷新父页面
+                                    $(window.parent.document).find("iframe")[6].contentWindow.location.reload(true);//刷新父页面
+
+                                }else{
+                                    layer.msg("删除失败！");
+                                }
+                            },error:function(){
+                                layer.close(index);
+                                layer.msg("删除失败！");
+                            }
+                        });
+                      layer.close(index);
+
+                    });
+}
+
+                }
+              });
+
+            });
+
+            function addUser(id) {
+				index = parent.layer.open({
+					type : 2,
+					title : "共享文件管理",
+					area: ['650px', '500px'],
+					content : '/open_file/edit_page?id=' + id
+				});
+				layer.full(index);
+			}
+
+
+</script>
+
+<!-- 头部工具栏按钮 -->
+		<script type="text/html" id="toolbarDemo">
+			<div class="layui-btn-container">
+                {%if user_type in [1,2]%}
+		        <button class="layui-btn" lay-event="add" onclick="addUser('')">新增</button>
+
+    {%endif%}
+		    </div>
+		</script>
+</body>
+</html>
